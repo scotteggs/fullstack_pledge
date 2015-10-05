@@ -19,22 +19,31 @@ $Promise.prototype.then = function(successCb, errorCb) {
 
   this.handlerGroups.push(group)
 
-  if(this.state === 'resolved')
+  if(this.state === 'resolved' ||
+    this.state === 'rejected') {
     this.callHandlers(this.handlerGroups);
+  }
+
 }
 
 $Promise.prototype.callHandlers = function(handlerGroups) {
   // if(!handlerGroups.length) return;
 
   for(var i = 0; i < handlerGroups.length; i++) {
-    if(!!handlerGroups[i].successCb)
+    if(!!handlerGroups[i].successCb  &&
+        this.state === 'resolved')
       handlerGroups[i].successCb(this.value);
 
-    if(!!handlerGroups[i].errorCb)
-      handlerGroups[i].errorCb(this.value);
+    if(!!handlerGroups[i].errorCb &&
+        this.state === 'rejected')
+        handlerGroups[i].errorCb(this.value);
   }
-  this.handlerGroups = [];
 
+  this.handlerGroups = [];
+}
+
+$Promise.prototype.catch = function(errorCb) {
+  this.then(null, errorCb);
 }
 
 var Deferral = function() {
@@ -51,9 +60,11 @@ Deferral.prototype.resolve = function(data) {
 }
 
 Deferral.prototype.reject = function(reason) {
-  if(this.$promise.state === 'pending') {
-    this.$promise.state = 'rejected';
-    if(!!reason) this.$promise.value = reason;
+  var thisP = this.$promise;
+  if(thisP.state === 'pending') {
+    thisP.state = 'rejected';
+    if(!!reason) thisP.value = reason;
+    thisP.callHandlers(thisP.handlerGroups)
   }
 }
 
