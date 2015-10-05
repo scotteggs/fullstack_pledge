@@ -24,6 +24,8 @@ $Promise.prototype.then = function(successCb, errorCb) {
 }
 
 $Promise.prototype.callHandlers = function(handlerGroups) {
+  // if(!handlerGroups.length) return;
+
   for(var i = 0; i < handlerGroups.length; i++) {
     if(!!handlerGroups[i].successCb)
       handlerGroups[i].successCb(this.value);
@@ -31,7 +33,7 @@ $Promise.prototype.callHandlers = function(handlerGroups) {
     if(!!handlerGroups[i].errorCb)
       handlerGroups[i].errorCb(this.value);
   }
-
+  this.handlerGroups = [];
 
 }
 
@@ -40,9 +42,11 @@ var Deferral = function() {
 }
 
 Deferral.prototype.resolve = function(data) {
-  if(this.$promise.state === 'pending') {
-    this.$promise.state = 'resolved';
-    if(!!data) this.$promise.value = data;
+  var thisP = this.$promise;
+  if(thisP.state === 'pending') {
+    thisP.state = 'resolved';
+    if(!!data) thisP.value = data;
+    thisP.callHandlers(thisP.handlerGroups)
   }
 }
 
