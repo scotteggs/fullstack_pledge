@@ -58,7 +58,11 @@ describe("A promise's .then method", function(){
 // Getting to the main functionality
 describe('A promise', function(){
 
-  var fn, numDeferral, promiseForNum, foo;
+  var fn,
+  numDeferral,
+  promiseForNum,
+  foo;
+
   fn = {
     setFoo10: function () { foo = 10; },
     addToFoo: function (num) { foo += num; }
@@ -73,7 +77,7 @@ describe('A promise', function(){
 
   describe('that is not yet resolved', function(){
 
-    xit('does not call any success handlers yet', function(){
+    it('does not call any success handlers yet', function(){
       promiseForNum.then( fn.setFoo10 );
       expect( fn.setFoo10 ).not.toHaveBeenCalled();
     });
@@ -88,17 +92,17 @@ describe('A promise', function(){
 
     // Recommended: add a .callHandlers method to your promise prototype.
 
-    xit('calls a success handler added by .then', function(){
+    it('calls a success handler added by .then', function(){
       promiseForNum.then( fn.setFoo10 );
       expect( fn.setFoo10 ).toHaveBeenCalled();
     });
 
-    xit("calls a success handler by passing in the promise's value", function(){
+    it("calls a success handler by passing in the promise's value", function(){
       promiseForNum.then( fn.addToFoo );
       expect( fn.addToFoo ).toHaveBeenCalledWith( 25 );
     });
 
-    xit('calls each success handler once per attachment', function(){
+    it('calls each success handler once per attachment', function(){
       promiseForNum.then( fn.setFoo10 );
       promiseForNum.then( fn.addToFoo );
       promiseForNum.then( fn.addToFoo );

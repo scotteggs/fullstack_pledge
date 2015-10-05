@@ -1,13 +1,14 @@
 var $Promise = function() {
   this.state = 'pending';
   this.value = undefined;
+  //handler groups has an array of objects, each containing one or two functions: success and error callbacks.
   this.handlerGroups = [];
 
 }
 
 $Promise.prototype.then = function(successCb, errorCb) {
   var group = {}
-  
+
   if (typeof successCb === 'function')
     group.successCb = successCb;
   else group.successCb = undefined;
@@ -17,6 +18,21 @@ $Promise.prototype.then = function(successCb, errorCb) {
   else group.errorCb = undefined;
 
   this.handlerGroups.push(group)
+
+  if(this.state === 'resolved')
+    this.callHandlers(this.handlerGroups);
+}
+
+$Promise.prototype.callHandlers = function(handlerGroups) {
+  for(var i = 0; i < handlerGroups.length; i++) {
+    if(!!handlerGroups[i].successCb)
+      handlerGroups[i].successCb(this.value);
+
+    if(!!handlerGroups[i].errorCb)
+      handlerGroups[i].errorCb(this.value);
+  }
+
+
 }
 
 var Deferral = function() {
