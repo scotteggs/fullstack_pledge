@@ -7,6 +7,22 @@ var $Promise = function() {
 }
 
 $Promise.prototype.then = function(successCb, errorCb) {
+  var group = this.groupAdder(successCb, errorCb);
+  group.forwarder = new Deferral();
+
+  this.handlerGroups.push(group)
+
+  if(this.state === 'resolved') {
+    if(!successCb) group.forwarder.resolve(this.value);
+  } else if(this.state === 'rejected') {
+
+  }
+    this.callHandlers(this.handlerGroups);
+
+  return group.forwarder.$promise;
+}
+
+$Promise.prototype.groupAdder = function(successCb, errorCb) {
   var group = {}
 
   if (typeof successCb === 'function')
@@ -17,18 +33,10 @@ $Promise.prototype.then = function(successCb, errorCb) {
     group.errorCb = errorCb;
   else group.errorCb = undefined;
 
-  this.handlerGroups.push(group)
-
-  if(this.state === 'resolved' ||
-    this.state === 'rejected') {
-    this.callHandlers(this.handlerGroups);
-  }
-
+  return group;
 }
 
 $Promise.prototype.callHandlers = function(handlerGroups) {
-  // if(!handlerGroups.length) return;
-
   for(var i = 0; i < handlerGroups.length; i++) {
     if(!!handlerGroups[i].successCb  &&
         this.state === 'resolved')
@@ -44,6 +52,7 @@ $Promise.prototype.callHandlers = function(handlerGroups) {
 
 $Promise.prototype.catch = function(errorCb) {
   this.then(null, errorCb);
+  return new $Promise();
 }
 
 var Deferral = function() {
